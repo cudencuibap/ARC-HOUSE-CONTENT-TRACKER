@@ -60,6 +60,7 @@ CONFIG_DIR  = os.environ.get("ARC_CONFIG_DIR", "/config")
 APP_DIR     = os.path.dirname(os.path.abspath(__file__))
 EXCEL_PATH  = os.path.join(DATA_DIR, "arc-content.xlsx")
 DEBUG_DIR   = os.path.join(DATA_DIR, "debug")
+LANG_PATH   = os.path.join(CONFIG_DIR, "language.txt")   # "en" hoac "vi"
 
 # nonce: script Node + file chunk JS (co the bi sua/refresh khi site deploy lai)
 NONCE_SCRIPT = os.path.join(APP_DIR, "nonce_gen.js")
@@ -79,6 +80,199 @@ COLUMNS = ["ID", "Type", "Title", "URL", "Points",
 class C:
     R = "\033[91m"; G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"
     M = "\033[95m"; CY = "\033[96m"; GR = "\033[90m"; W = "\033[0m"; BOLD = "\033[1m"
+
+# ----------------------------- i18n (EN/VI) -----------------------------
+# QUAN TRONG: cac string o day chi la DISPLAY value (dich theo ngon ngu).
+# Gia tri INTERNAL trong Excel ("Chua xem"/"Da xem"/"Yes"/"Video"/"Article")
+# KHONG nam o day -> giu nguyen, khong bao gio doi -> data cu tuong thich 100%.
+TRANSLATIONS = {
+    "en": {
+        # startup
+        "startup":            "Starting Arc House Tracker...",
+        "excel_path":         "Excel: {path}",
+        "error_nonce":        "Could not generate x-nonce (need Node + nonce_gen.js). Stopping.",
+        "cookie_loaded":      "Cookie + nonce OK -> syncing history + points.",
+        "no_cookie_public":   "No cookie -> scraping public content only.",
+        # sync
+        "sync_fetching":      "Loading content from Arc House (main page + collections)...",
+        "sync_found":         "Found {n} content items.",
+        "sync_collection_err":"  Collection {slug} error: {e}",
+        "sync_logs_read":     "Read {logs} logs -> {viewed} content viewed/read.",
+        "sync_marked_viewed": "Marked {n} items as viewed/read from real history.",
+        "sync_new_items":     "Added {n} new items.",
+        "error_no_cookie":    "No cookie -> skipping history sync (see README).",
+        "error_graphql":      "Could not read history (GraphQL): {e}",
+        "error_points":       "Could not fetch lifetime points: {e}",
+        "error_network":      "Content scrape error: {e}",
+        "error_excel":        "Could not read old Excel ({e}), creating new.",
+        # dashboard
+        "dashboard_title":            "ARC HOUSE CONTENT TRACKER",
+        "dashboard_lifetime_section": "LIFETIME",
+        "dashboard_lifetime_points":  "Lifetime points",
+        "dashboard_videos_progress":  "Videos",
+        "dashboard_articles_progress":"Articles",
+        "dashboard_viewed_suffix":    "viewed",
+        "dashboard_read_suffix":      "read",
+        "dashboard_today_section":    "TODAY ({date})",
+        "dashboard_video_quota_today":   "Videos",
+        "dashboard_article_quota_today": "Articles",
+        "dashboard_daily_active":     "Daily Active",
+        "dashboard_points_today":     "Points today (from real log): {pts}",
+        "dashboard_max_potential":    "STILL EARNABLE",
+        "dashboard_earnable":         "{vslot} video x4 + {aslot} article x2 = {earnable} pts",
+        # recommend
+        "recommend_header":        "TODAY'S RECOMMENDATIONS",
+        "recommend_maxed_out":     "Daily view/read points MAXED out! Come back tomorrow.",
+        "recommend_videos_left":   "[Video] {vslot} slot(s) left (4pts each):",
+        "recommend_no_videos":     "  (No unwatched videos left)",
+        "recommend_articles_left": "[Article] {aslot} slot(s) left (2pts each):",
+        "recommend_no_articles":   "  (No unread articles left)",
+        "recommend_earnable":      "Still earnable: {pts} pts today",
+        # report
+        "report_header":       "REPORT DEAD LINKS",
+        "report_no_items":     "  (No recommended items to report)",
+        "report_select_prompt":"Enter dead-link item numbers (e.g. 1,3,5), Enter to skip: ",
+        "report_nothing":      "Nothing reported.",
+        "report_confirmed":    "Blacklisted {n} item(s) (saved to Excel, won't be recommended again).",
+        "report_none_new":     "No new items were blacklisted.",
+        # menu
+        "menu_title":     "MENU",
+        "menu_recommend": "Today's recommendations (refresh + sync)",
+        "menu_report":    "Report dead links (blacklist)",
+        "menu_dashboard": "Dashboard",
+        "menu_exit":      "Exit",
+        "prompt_choose":  "Choose: ",
+        "prompt_invalid": "Invalid choice.",
+        "exit_message":   "Bye!",
+        # status (display only)
+        "status_not_viewed": "Not viewed",
+        "status_viewed":     "Viewed",
+        "status_blacklisted":"Blacklisted",
+        # language picker
+        "lang_prompt": "Select language / Chon ngon ngu:\n  1. English\n  2. Tieng Viet",
+        "lang_choose": "Choose (1/2): ",
+        "lang_set":    "Language set to English.",
+    },
+    "vi": {
+        # startup
+        "startup":            "Khoi dong Arc House Tracker...",
+        "excel_path":         "Excel: {path}",
+        "error_nonce":        "Khong sinh duoc x-nonce (can Node + nonce_gen.js). Dung lai.",
+        "cookie_loaded":      "Da nap cookie + nonce OK -> dong bo lich su + points.",
+        "no_cookie_public":   "Chua co cookie -> chi cao content public.",
+        # sync
+        "sync_fetching":      "Dang tai content tu Arc House (trang chinh + collections)...",
+        "sync_found":         "Tim thay {n} item content.",
+        "sync_collection_err":"  Collection {slug} loi: {e}",
+        "sync_logs_read":     "Doc {logs} log -> {viewed} content da xem/doc.",
+        "sync_marked_viewed": "Danh dau {n} item da xem/doc tu lich su that.",
+        "sync_new_items":     "Them {n} item moi.",
+        "error_no_cookie":    "Chua co cookie -> bo qua dong bo lich su (xem README).",
+        "error_graphql":      "Khong doc duoc lich su (GraphQL): {e}",
+        "error_points":       "Khong lay duoc lifetime points: {e}",
+        "error_network":      "Loi cao content: {e}",
+        "error_excel":        "Khong doc duoc Excel cu ({e}), tao moi.",
+        # dashboard
+        "dashboard_title":            "ARC HOUSE CONTENT TRACKER",
+        "dashboard_lifetime_section": "LIFETIME",
+        "dashboard_lifetime_points":  "Lifetime points",
+        "dashboard_videos_progress":  "Videos",
+        "dashboard_articles_progress":"Articles",
+        "dashboard_viewed_suffix":    "da xem",
+        "dashboard_read_suffix":      "da doc",
+        "dashboard_today_section":    "HOM NAY ({date})",
+        "dashboard_video_quota_today":   "Videos",
+        "dashboard_article_quota_today": "Articles",
+        "dashboard_daily_active":     "Daily Active",
+        "dashboard_points_today":     "Diem hom nay (tu log that): {pts}",
+        "dashboard_max_potential":    "CON CO THE KIEM",
+        "dashboard_earnable":         "{vslot} video x4 + {aslot} article x2 = {earnable} diem",
+        # recommend
+        "recommend_header":        "DE XUAT HOM NAY",
+        "recommend_maxed_out":     "Da MAX diem xem/doc hom nay! Quay lai mai.",
+        "recommend_videos_left":   "[Video] Con {vslot} slot (4d/cai):",
+        "recommend_no_videos":     "  (Het video chua xem)",
+        "recommend_articles_left": "[Article] Con {aslot} slot (2d/cai):",
+        "recommend_no_articles":   "  (Het bai chua doc)",
+        "recommend_earnable":      "Con co the kiem: {pts} diem hom nay",
+        # report
+        "report_header":       "REPORT LINK DIE",
+        "report_no_items":     "  (Khong co item nao dang de xuat de report)",
+        "report_select_prompt":"Nhap so item link die (vd 1,3,5), Enter de bo qua: ",
+        "report_nothing":      "Khong report gi.",
+        "report_confirmed":    "Da blacklist {n} item (da luu Excel, se khong de xuat lai).",
+        "report_none_new":     "Khong co item moi nao duoc blacklist.",
+        # menu
+        "menu_title":     "MENU",
+        "menu_recommend": "De xuat hom nay (refresh + dong bo)",
+        "menu_report":    "Report link die (blacklist)",
+        "menu_dashboard": "Dashboard",
+        "menu_exit":      "Thoat",
+        "prompt_choose":  "Chon: ",
+        "prompt_invalid": "Lua chon khong hop le.",
+        "exit_message":   "Bye!",
+        # status (display only)
+        "status_not_viewed": "Chua xem",
+        "status_viewed":     "Da xem",
+        "status_blacklisted":"Da blacklist",
+        # language picker
+        "lang_prompt": "Select language / Chon ngon ngu:\n  1. English\n  2. Tieng Viet",
+        "lang_choose": "Choose / Chon (1/2): ",
+        "lang_set":    "Da chon Tieng Viet.",
+    },
+}
+
+LANG = "en"   # set boi load_language()/select_language() khi khoi dong
+
+def t(key, **kwargs):
+    """Tra string theo LANG hien tai; fallback 'en' neu key thieu."""
+    s = TRANSLATIONS.get(LANG, {}).get(key)
+    if s is None:
+        s = TRANSLATIONS["en"].get(key, key)
+    return s.format(**kwargs) if kwargs else s
+
+def load_language():
+    """Doc ngon ngu da luu tu config/language.txt. Tra ve 'en'/'vi' hoac None."""
+    try:
+        if os.path.exists(LANG_PATH):
+            with open(LANG_PATH, "r", encoding="utf-8") as f:
+                v = f.read().strip().lower()
+            if v in TRANSLATIONS:
+                return v
+    except Exception:
+        pass
+    return None
+
+def select_language():
+    """Set bien global LANG. Lan dau (chua co file) thi hoi user va luu lai.
+    Non-TTY (CI/pipe) ma chua co file -> mac dinh 'en', khong hoi."""
+    global LANG
+    saved = load_language()
+    if saved:
+        LANG = saved
+        return
+    if not sys.stdin.isatty():
+        LANG = "en"
+        return
+    print(TRANSLATIONS["en"]["lang_prompt"])
+    while True:
+        choice = input(TRANSLATIONS["en"]["lang_choose"]).strip()
+        if choice == "1":
+            LANG = "en"; break
+        if choice == "2":
+            LANG = "vi"; break
+        print("Invalid / Khong hop le.")
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(LANG_PATH, "w", encoding="utf-8") as f:
+            f.write(LANG)
+    except Exception:
+        pass
+    print(f"{C.G}{t('lang_set')}{C.W}")
+
+def status_display(d):
+    """Status INTERNAL -> DISPLAY (translated). Khong doi gia tri trong Excel."""
+    return t("status_viewed") if d.get("Status") == "Da xem" else t("status_not_viewed")
 
 def today_str():
     return dt.date.today().isoformat()
@@ -237,7 +431,7 @@ def _record_to_item(rec):
 
 # ----------------------------- Cao content public -----------------------------
 def fetch_public_content(session):
-    print(f"{C.CY}Dang tai content tu Arc House (trang chinh + collections)...{C.W}")
+    print(f"{C.CY}{t('sync_fetching')}{C.W}")
     items = {}
 
     def add(recs):
@@ -267,7 +461,7 @@ def fetch_public_content(session):
                 d = gql(session, "GetPaginatedCollectionPageTenantContents", Q_COLLECTION,
                         {"tenantId": TENANT_ID, "collectionSlug": slug, "skip": s2, "limit": PAGE}).get("contents")
             except Exception as e:
-                print(f"{C.Y}  Collection {slug} loi: {e}{C.W}")
+                print(f"{C.Y}{t('sync_collection_err', slug=slug, e=e)}{C.W}")
                 break
             if not d:
                 break
@@ -276,7 +470,7 @@ def fetch_public_content(session):
             if not recs or s2 >= d["totalCount"]:
                 break
 
-    print(f"{C.G}Tim thay {len(items)} item content.{C.W}")
+    print(f"{C.G}{t('sync_found', n=len(items))}{C.W}")
     return list(items.values())
 
 # ----------------------------- Lich su da xem + points -----------------------------
@@ -298,7 +492,7 @@ def fetch_lifetime_points(session):
         tu = gql(session, "MyContributionInfo", Q_POINTS, {"tenantId": TENANT_ID}).get("tenantUser") or {}
         return tu.get("totalContributionPoints")
     except Exception as e:
-        print(f"{C.Y}Khong lay duoc lifetime points: {e}{C.W}")
+        print(f"{C.Y}{t('error_points', e=e)}{C.W}")
         return None
 
 def fetch_viewed_titles(session, has_cookie):
@@ -308,13 +502,13 @@ def fetch_viewed_titles(session, has_cookie):
     Khong co cookie / loi -> tra ve {}.
     """
     if not has_cookie:
-        print(f"{C.Y}Chua co cookie -> bo qua dong bo lich su (xem README).{C.W}")
+        print(f"{C.Y}{t('error_no_cookie')}{C.W}")
         return {}
     os.makedirs(DEBUG_DIR, exist_ok=True)
     try:
         logs = fetch_contribution_logs(session)
     except Exception as e:
-        print(f"{C.R}Khong doc duoc lich su (GraphQL): {e}{C.W}")
+        print(f"{C.R}{t('error_graphql', e=e)}{C.W}")
         return {}
 
     with open(os.path.join(DEBUG_DIR, "contribution_logs.json"), "w", encoding="utf-8") as f:
@@ -333,7 +527,7 @@ def fetch_viewed_titles(session, has_cookie):
         k = norm(title)
         if k and (k not in viewed or date > viewed[k]):
             viewed[k] = date
-    print(f"{C.G}Doc {len(logs)} log -> {len(viewed)} content da xem/doc.{C.W}")
+    print(f"{C.G}{t('sync_logs_read', logs=len(logs), viewed=len(viewed))}{C.W}")
     return viewed
 
 def apply_viewed(data, viewed):
@@ -374,7 +568,7 @@ def load_excel():
             rows.append(d)
         return rows
     except Exception as e:
-        print(f"{C.Y}Khong doc duoc Excel cu ({e}), tao moi.{C.W}")
+        print(f"{C.Y}{t('error_excel', e=e)}{C.W}")
         return []
 
 def save_excel(data):
@@ -429,7 +623,7 @@ def sync(session, has_cookie):
     try:
         fresh = fetch_public_content(session)
     except Exception as e:
-        print(f"{C.R}Loi cao content: {e}{C.W}")
+        print(f"{C.R}{t('error_network', e=e)}{C.W}")
         fresh = []
 
     new_count = 0
@@ -452,11 +646,11 @@ def sync(session, has_cookie):
             logs = []
         points = fetch_lifetime_points(session)
         if matched:
-            print(f"{C.G}Danh dau {matched} item da xem/doc tu lich su that.{C.W}")
+            print(f"{C.G}{t('sync_marked_viewed', n=matched)}{C.W}")
 
     save_excel(data)
     if new_count:
-        print(f"{C.G}Them {new_count} item moi.{C.W}")
+        print(f"{C.G}{t('sync_new_items', n=new_count)}{C.W}")
     return data, logs, points
 
 # ----------------------------- Dashboard / de xuat -----------------------------
@@ -486,27 +680,27 @@ def dashboard(data, logs, points):
 
     print()
     print(f"{C.CY}{'='*48}{C.W}")
-    print(f"{C.CY}{C.BOLD}        ARC HOUSE CONTENT TRACKER{C.W}")
+    print(f"{C.CY}{C.BOLD}        {t('dashboard_title')}{C.W}")
     print(f"{C.CY}{'='*48}{C.W}")
 
-    print(f"\n{C.Y}LIFETIME{C.W}")
+    print(f"\n{C.Y}{t('dashboard_lifetime_section')}{C.W}")
     lp = points if points is not None else "?"
-    print(f"  Lifetime points : {C.M}{lp}{C.W}")
-    print(f"  Videos          : {vv:3d} / {len(videos):<3d} da xem")
-    print(f"  Articles        : {av:3d} / {len(articles):<3d} da doc")
+    print(f"  {t('dashboard_lifetime_points'):<16}: {C.M}{lp}{C.W}")
+    print(f"  {t('dashboard_videos_progress'):<16}: {vv:3d} / {len(videos):<3d} {t('dashboard_viewed_suffix')}")
+    print(f"  {t('dashboard_articles_progress'):<16}: {av:3d} / {len(articles):<3d} {t('dashboard_read_suffix')}")
 
-    print(f"\n{C.Y}HOM NAY ({today_str()}){C.W}")
+    print(f"\n{C.Y}{t('dashboard_today_section', date=today_str())}{C.W}")
     vc = C.G if vt >= VIDEO_DAILY_MAX else C.W
     ac = C.G if at >= ARTICLE_DAILY_MAX else C.W
-    print(f"  {vc}Videos {vt}/{VIDEO_DAILY_MAX}{C.W}  |  "
-          f"{ac}Articles {at}/{ARTICLE_DAILY_MAX}{C.W}  |  Daily Active {daily}")
-    print(f"  {C.M}Diem hom nay (tu log that): {pts_today}{C.W}")
+    print(f"  {vc}{t('dashboard_video_quota_today')} {vt}/{VIDEO_DAILY_MAX}{C.W}  |  "
+          f"{ac}{t('dashboard_article_quota_today')} {at}/{ARTICLE_DAILY_MAX}{C.W}  |  {t('dashboard_daily_active')} {daily}")
+    print(f"  {C.M}{t('dashboard_points_today', pts=pts_today)}{C.W}")
 
     vslot = max(0, VIDEO_DAILY_MAX - vt)
     aslot = max(0, ARTICLE_DAILY_MAX - at)
     earnable = vslot * VIDEO_POINTS + aslot * ARTICLE_POINTS
-    print(f"\n{C.Y}CON CO THE KIEM{C.W}")
-    print(f"  {vslot} video x4 + {aslot} article x2 = {C.G}{earnable} diem{C.W}")
+    print(f"\n{C.Y}{t('dashboard_max_potential')}{C.W}")
+    print(f"  {C.G}{t('dashboard_earnable', vslot=vslot, aslot=aslot, earnable=earnable)}{C.W}")
 
 def is_blacklisted(d):
     return str(d.get("Blacklist", "")).strip().lower() == "yes"
@@ -531,29 +725,29 @@ def get_recommendations(data, logs):
 def recommend(data, logs):
     vids, arts, vslot, aslot = get_recommendations(data, logs)
 
-    print(f"\n{C.Y}DE XUAT HOM NAY{C.W}")
+    print(f"\n{C.Y}{t('recommend_header')}{C.W}")
     print(f"{C.GR}{'-'*48}{C.W}")
     if vslot == 0 and aslot == 0:
-        print(f"{C.G}Da MAX diem xem/doc hom nay! Quay lai mai.{C.W}")
+        print(f"{C.G}{t('recommend_maxed_out')}{C.W}")
         return
 
     if vslot > 0:
-        print(f"\n{C.CY}[Video] Con {vslot} slot (4d/cai):{C.W}")
+        print(f"\n{C.CY}{t('recommend_videos_left', vslot=vslot)}{C.W}")
         if not vids:
-            print(f"{C.GR}  (Het video chua xem){C.W}")
+            print(f"{C.GR}{t('recommend_no_videos')}{C.W}")
         for i, d in enumerate(vids, 1):
             print(f"  {i}. {d['Title']}")
             print(f"     {C.B}{d['URL']}{C.W}")
 
     if aslot > 0:
-        print(f"\n{C.CY}[Article] Con {aslot} slot (2d/cai):{C.W}")
+        print(f"\n{C.CY}{t('recommend_articles_left', aslot=aslot)}{C.W}")
         if not arts:
-            print(f"{C.GR}  (Het bai chua doc){C.W}")
+            print(f"{C.GR}{t('recommend_no_articles')}{C.W}")
         for i, d in enumerate(arts, 1):
             print(f"  {i}. {d['Title']}")
             print(f"     {C.B}{d['URL']}{C.W}")
 
-    print(f"\n{C.M}Con co the kiem: {vslot*4 + aslot*2} diem hom nay{C.W}")
+    print(f"\n{C.M}{t('recommend_earnable', pts=vslot*4 + aslot*2)}{C.W}")
 
 def report_dead_links(data, logs):
     """Hien danh sach item dang de xuat hom nay (video + article, danh so chung).
@@ -561,19 +755,19 @@ def report_dead_links(data, logs):
     vids, arts, _, _ = get_recommendations(data, logs)
     items = vids + arts   # danh so chung: video truoc, article sau
 
-    print(f"\n{C.Y}REPORT LINK DIE{C.W}")
+    print(f"\n{C.Y}{t('report_header')}{C.W}")
     print(f"{C.GR}{'-'*48}{C.W}")
     if not items:
-        print(f"{C.GR}  (Khong co item nao dang de xuat de report){C.W}")
+        print(f"{C.GR}{t('report_no_items')}{C.W}")
         return
 
     for i, d in enumerate(items, 1):
         print(f"  {i}. [{d['Type']}] {d['Title']}")
         print(f"     {C.B}{d['URL']}{C.W}")
 
-    raw = input(f"\nNhap so item link die (vd 1,3,5), Enter de bo qua: ").strip()
+    raw = input(f"\n{t('report_select_prompt')}").strip()
     if not raw:
-        print(f"{C.GR}Khong report gi.{C.W}")
+        print(f"{C.GR}{t('report_nothing')}{C.W}")
         return
 
     picked = set()
@@ -592,31 +786,32 @@ def report_dead_links(data, logs):
 
     if n_black:
         save_excel(data)
-        print(f"{C.G}Da blacklist {n_black} item (da luu Excel, se khong de xuat lai).{C.W}")
+        print(f"{C.G}{t('report_confirmed', n=n_black)}{C.W}")
     else:
-        print(f"{C.GR}Khong co item moi nao duoc blacklist.{C.W}")
+        print(f"{C.GR}{t('report_none_new')}{C.W}")
 
 # ----------------------------- Menu -----------------------------
-MENU = f"""
-{C.CY}============ MENU ============{C.W}
-  1. De xuat hom nay (refresh + dong bo)
-  2. Report link die (blacklist)
-  3. Dashboard
-  0. Thoat
-{C.CY}=============================={C.W}"""
+def menu_text():
+    return (f"\n{C.CY}============ {t('menu_title')} ============{C.W}\n"
+            f"  1. {t('menu_recommend')}\n"
+            f"  2. {t('menu_report')}\n"
+            f"  3. {t('menu_dashboard')}\n"
+            f"  0. {t('menu_exit')}\n"
+            f"{C.CY}=============================={C.W}")
 
 def main():
-    print(f"{C.CY}Khoi dong Arc House Tracker...{C.W}")
-    print(f"{C.GR}Excel: {EXCEL_PATH}{C.W}")
+    select_language()   # lan dau hoi EN/VI + luu config/language.txt; lan sau dung luon
+    print(f"{C.CY}{t('startup')}{C.W}")
+    print(f"{C.GR}{t('excel_path', path=EXCEL_PATH)}{C.W}")
     session, has_cookie = make_session()
 
     if not ensure_nonce(session):
-        print(f"{C.R}Khong sinh duoc x-nonce (can Node + nonce_gen.js). Dung lai.{C.W}")
+        print(f"{C.R}{t('error_nonce')}{C.W}")
         return
     if has_cookie:
-        print(f"{C.G}Da nap cookie + nonce OK -> dong bo lich su + points.{C.W}")
+        print(f"{C.G}{t('cookie_loaded')}{C.W}")
     else:
-        print(f"{C.Y}Chua co cookie -> chi cao content public.{C.W}")
+        print(f"{C.Y}{t('no_cookie_public')}{C.W}")
 
     data, logs, points = sync(session, has_cookie)
     dashboard(data, logs, points)
@@ -626,8 +821,8 @@ def main():
         return
 
     while True:
-        print(MENU)
-        c = input("Chon: ").strip()
+        print(menu_text())
+        c = input(t("prompt_choose")).strip()
         if c == "1":
             data, logs, points = sync(session, has_cookie)
             dashboard(data, logs, points)
@@ -637,10 +832,10 @@ def main():
         elif c == "3":
             dashboard(data, logs, points)
         elif c == "0":
-            print(f"{C.CY}Bye!{C.W}")
+            print(f"{C.CY}{t('exit_message')}{C.W}")
             break
         else:
-            print(f"{C.R}Lua chon khong hop le.{C.W}")
+            print(f"{C.R}{t('prompt_invalid')}{C.W}")
 
 if __name__ == "__main__":
     main()
