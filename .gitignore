@@ -1,0 +1,15 @@
+# Bi mat - TUYET DOI khong push
+config/cookie.txt
+
+# Du lieu sinh ra khi chay (Excel, debug logs) - khong push, nhung giu folder
+data/*
+!data/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+
+# Misc
+*.zip
+_t/
+~$*

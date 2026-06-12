@@ -1,0 +1,13 @@
+services:
+  arc-tracker:
+    build: .
+    image: arc-house-tracker
+    container_name: arc-house-tracker
+    stdin_open: true      # giu STDIN mo (de menu tuong tac duoc)
+    tty: true             # cap TTY (mau sac + input)
+    volumes:
+      - ./data:/data      # Excel + debug luu ra host, khong mat khi tat container
+      - ./config:/config  # cookie.txt nam o day
+    # Co the truyen cookie qua env thay vi file:
+    # environment:
+    #   - ARC_COOKIE=${ARC_COOKIE}

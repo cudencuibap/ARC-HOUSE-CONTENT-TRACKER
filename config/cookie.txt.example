@@ -1,0 +1,15 @@
+# HUONG DAN LAY COOKIE
+# ---------------------
+# 1. Mo Chrome, dang nhap vao https://community.arc.io (bang Gmail nhu binh thuong)
+# 2. Bam F12 mo DevTools -> tab "Network"
+# 3. Tai lai trang (F5). Click vao request dau tien (ten trang, vd "home" hoac "content")
+# 4. Keo xuong phan "Request Headers" -> tim dong "cookie:"
+# 5. Copy TOAN BO gia tri sau chu "cookie:" (rat dai)
+# 6. Doi ten file nay thanh "cookie.txt" va dan gia tri vao (xoa het cac dong bat dau bang #)
+#
+# LUU Y AN TOAN:
+# - Cookie nay = chia khoa dang nhap tai khoan Arc cua ban. KHONG share cho ai.
+# - File chi nam tren may ban. Khong up len cloud cong khai.
+# - Cookie se het han sau vai ngay/tuan -> luc do lam lai buoc tren.
+#
+# Dan cookie ngay duoi dong nay (1 dong duy nhat), roi luu file ten cookie.txt:
